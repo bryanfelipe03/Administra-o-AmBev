@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10151A">
+<title>Rota Control — Estoque & Contratos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<header class="topbar">
+  <div class="topbar-title">
+    <span class="logo-dot"></span>
+    <h1>Rota Control</h1>
+  </div>
+  <button id="alertChip" class="alert-chip" title="Produtos que precisam de atenção">
+    <span id="alertCount">0</span> alertas
+  </button>
+</header>
+
+<main id="app">
+
+  <!-- ===================== TELA: PRODUTOS ===================== -->
+  <section id="tab-produtos" class="screen active">
+    <form id="formProduto" class="card form-card">
+      <h2 class="card-title" id="formProdutoTitle">Adicionar produto</h2>
+      <label class="field">
+        <span>Nome do produto</span>
+        <input type="text" id="p_nome" placeholder="Ex: Cerveja Long Neck 355ml" required>
+      </label>
+      <div class="field-row">
+        <label class="field">
+          <span>Categoria</span>
+          <select id="p_categoria" required>
+            <option value="gondola">Gôndola</option>
+            <option value="produto_solto">Produto Solto</option>
+            <option value="fardo">Fardo</option>
+            <option value="ponto_extra_refri">Ponto Extra de Refri</option>
+            <option value="ponto_extra_cerveja">Ponto Extra de Cerveja</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Quantidade</span>
+          <input type="number" id="p_qtd" min="0" value="1" required>
+        </label>
+      </div>
+      <label class="field">
+        <span>Validade</span>
+        <input type="date" id="p_validade" required>
+      </label>
+      <div class="btn-row">
+        <button type="submit" id="btnSalvarProduto" class="btn btn-primary">+ Adicionar produto</button>
+        <button type="button" id="btnCancelarEdicao" class="btn btn-secondary hidden">Cancelar</button>
+      </div>
+    </form>
+
+    <div class="section-head">
+      <h2>Produtos <span id="produtosCount" class="muted"></span></h2>
+      <div class="filter-pills" id="filterPills">
+        <button class="pill active" data-filter="todos">Todos</button>
+        <button class="pill" data-filter="critico">🔴 Vencidos</button>
+        <button class="pill" data-filter="atencao">🟡 Atenção</button>
+        <button class="pill" data-filter="ok">🟢 Ok</button>
+      </div>
+    </div>
+
+    <div id="listaProdutos" class="list"></div>
+    <p id="produtosEmpty" class="empty-state hidden">Nenhum produto cadastrado ainda. Adicione o primeiro acima.</p>
+  </section>
+
+  <!-- ===================== TELA: WHATSAPP ===================== -->
+  <section id="tab-whatsapp" class="screen">
+    <div class="card">
+      <h2 class="card-title">Gerar mensagem para WhatsApp</h2>
+      <p class="hint">Escolha o que entra na mensagem antes de gerar.</p>
+      <label class="field">
+        <span>Filtrar por vencimento</span>
+        <select id="wpp_filtro">
+          <option value="todos">Todos os produtos</option>
+          <option value="alerta">Somente vencidos / em atenção</option>
+          <option value="30">Vencendo em até 30 dias</option>
+          <option value="60">Vencendo em até 60 dias</option>
+          <option value="90">Vencendo em até 90 dias (3 meses)</option>
+          <option value="180">Vencendo em até 6 meses</option>
+          <option value="365">Vencendo em até 1 ano</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Filtrar por categoria (opcional)</span>
+        <select id="wpp_categoria">
+          <option value="todas">Todas as categorias</option>
+          <option value="gondola">Gôndola</option>
+          <option value="produto_solto">Produto Solto</option>
+          <option value="fardo">Fardo</option>
+          <option value="ponto_extra_refri">Ponto Extra de Refri</option>
+          <option value="ponto_extra_cerveja">Ponto Extra de Cerveja</option>
+        </select>
+      </label>
+      <button id="btnGerarWpp" class="btn btn-primary">Gerar mensagem</button>
+    </div>
+
+    <div class="card" id="wppPreviewCard" style="display:none;">
+      <h2 class="card-title">Pré-visualização</h2>
+      <pre id="wppPreview" class="wpp-preview"></pre>
+      <div class="btn-row">
+        <button id="btnCopiar" class="btn btn-secondary">Copiar texto</button>
+        <button id="btnEnviar" class="btn btn-whatsapp">Abrir no WhatsApp</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TELA: METAS / CONTRATOS ===================== -->
+  <section id="tab-metas" class="screen">
+    <form id="formContrato" class="card form-card">
+      <h2 class="card-title">Adicionar contrato</h2>
+      <label class="field">
+        <span>Tipo de contrato</span>
+        <select id="c_tipo" required></select>
+      </label>
+      <label class="field">
+        <span>Cliente / Ponto de venda</span>
+        <input type="text" id="c_cliente" placeholder="Ex: Bar do Zé" required>
+      </label>
+      <div class="field-row">
+        <label class="field">
+          <span>Data do contrato</span>
+          <input type="date" id="c_data" required>
+        </label>
+      </div>
+      <label class="field">
+        <span>Observação (opcional)</span>
+        <input type="text" id="c_obs" placeholder="Detalhes do combinado">
+      </label>
+      <button type="submit" class="btn btn-primary">+ Adicionar contrato</button>
+    </form>
+
+    <div class="section-head">
+      <h2>Metas por tipo</h2>
+    </div>
+    <div id="listaMetas" class="list"></div>
+
+    <div class="section-head">
+      <h2>Últimos contratos</h2>
+    </div>
+    <div id="listaContratos" class="list"></div>
+    <p id="contratosEmpty" class="empty-state hidden">Nenhum contrato cadastrado ainda.</p>
+  </section>
+
+</main>
+
+<nav class="tabbar">
+  <button class="tab-btn active" data-tab="tab-produtos">
+    <svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>
+    <span>Produtos</span>
+  </button>
+  <button class="tab-btn" data-tab="tab-whatsapp">
+    <svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.55L3 20l1.02-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg>
+    <span>WhatsApp</span>
+  </button>
+  <button class="tab-btn" data-tab="tab-metas">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6"/></svg>
+    <span>Metas</span>
+  </button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
